@@ -35,13 +35,25 @@ what was opened.
 composer require aaix/laravel-islands-search
 ```
 
+Add the Vite plugin — it registers the import name `@aaix/laravel-islands-search` and, when the
+package is installed from a Composer path repository, points it at the working copy:
+
+```js
+// vite.config.js
+import islandsSearch from './vendor/aaix/laravel-islands-search/vite.js';
+
+export default defineConfig({
+    plugins: [/* … */ islandsSearch()],
+});
+```
+
 Register the package's island next to your own and let Tailwind see its classes:
 
 ```js
 // resources/js/app.js
 import islands from '@aaix/laravel-islands/islands';
 import { startVueIslands } from '@aaix/laravel-islands/vue';
-import { searchIslands } from '../../vendor/aaix/laravel-islands-search/resources/js/index.js';
+import { searchIslands } from '@aaix/laravel-islands-search';
 
 startVueIslands({ ...islands, ...searchIslands });
 ```
@@ -211,7 +223,7 @@ new SearchHit(
 Then register a component for that kind once, before the islands start:
 
 ```js
-import { registerSearchRows, searchIslands } from '../../vendor/aaix/laravel-islands-search/resources/js/index.js';
+import { registerSearchRows, searchIslands } from '@aaix/laravel-islands-search';
 import OrderRow from './search/OrderRow.vue';
 
 registerSearchRows({ order: OrderRow });

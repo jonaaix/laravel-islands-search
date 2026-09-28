@@ -77,7 +77,7 @@ new SearchHit(title: $invoice->number, url: $url, subtitle: $invoice->customer_n
 Client side, register the component once before `startVueIslands`:
 
 ```js
-import { registerSearchRows, searchIslands } from '../../vendor/aaix/laravel-islands-search/resources/js/index.js';
+import { registerSearchRows, searchIslands } from '@aaix/laravel-islands-search';
 
 registerSearchRows({ invoice: InvoiceResultRow });
 startVueIslands({ ...islands, ...searchIslands });
