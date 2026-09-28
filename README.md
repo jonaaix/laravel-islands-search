@@ -316,4 +316,4 @@ while the island mounts). Style it from the host to match your application's chr
 
 ## License
 
-MIT
+[MIT](LICENSE.md)
