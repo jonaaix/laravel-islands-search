@@ -1,6 +1,6 @@
 {
     "name": "@aaix/laravel-islands-search",
-    "version": "1.0.9",
+    "version": "1.0.10",
     "description": "A keyboard-driven global search modal built on Laravel Islands, with an optional Filament panel integration.",
     "type": "module",
     "license": "MIT",

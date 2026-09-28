@@ -23,6 +23,7 @@ small class that answers a query with hits. The package groups them, renders the
 what was opened.
 
 - **Sources** — plain classes, or a Scout model in a few lines
+- **Tabs** — once more than one source answers, a tab per source with its hit count filters the list
 - **Own rows** — hand a result kind your own Vue component; the rest keep the built-in row
 - **Leading sources** — a source may move to the top for the queries it owns
 - **Recent hits** — kept in the browser, or on the server through a store you provide
@@ -148,7 +149,9 @@ class PageSource implements SearchSource
 }
 ```
 
-Groups appear in the order the sources are registered; a source without hits is left out. `icon`
+Groups appear in the order the sources are registered; a source without hits is left out. As
+soon as more than one group answers, tabs above the hits — *All* plus one per source, each with
+its count — filter the list; <kbd>←</kbd> <kbd>→</kbd> switch between them from the search field. `icon`
 is a Heroicon name (`o-…` outline, `s-…` solid, `m-…` mini) — the endpoint sends the SVG along,
 nothing has to be bundled.
 
