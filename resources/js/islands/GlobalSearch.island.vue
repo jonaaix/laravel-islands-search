@@ -215,7 +215,7 @@ onBeforeUnmount(() => {
     <div>
         <SearchTrigger :shortcut="isMac ? '⌘K' : 'Ctrl K'" :label="t('Search')" @open="open" />
 
-        <Modal :open="isOpen" :title="t('Search')" size="md" :close-label="t('Close')" @close="close">
+        <Modal :open="isOpen" :title="t('Search')" size="md" align="top" :close-label="t('Close')" @close="close">
             <div class="-mt-2 space-y-3">
                 <div ref="inputFrame" class="relative">
                     <TextField
