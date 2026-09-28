@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Aaix\LaravelIslandsSearch\Tests\Fixtures;
 
+use Aaix\LaravelIslandsSearch\Contracts\LeadsForQuery;
 use Aaix\LaravelIslandsSearch\Contracts\ProvidesSearchTips;
 use Aaix\LaravelIslandsSearch\SearchHit;
 use Aaix\LaravelIslandsSearch\SearchTip;
@@ -14,7 +15,7 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @extends ScoutSource<User>
  */
-class AdminUsersSource extends ScoutSource implements ProvidesSearchTips
+class AdminUsersSource extends ScoutSource implements LeadsForQuery, ProvidesSearchTips
 {
     public function key(): string
     {
@@ -29,6 +30,11 @@ class AdminUsersSource extends ScoutSource implements ProvidesSearchTips
     public function isVisibleTo(Authenticatable $user): bool
     {
         return $user instanceof User && $user->is_admin;
+    }
+
+    public function leadsFor(string $query): bool
+    {
+        return str_starts_with($query, 'ore');
     }
 
     public function tips(): array

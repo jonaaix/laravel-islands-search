@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Aaix\LaravelIslandsSearch\Http;
 
+use Aaix\LaravelIslandsSearch\Contracts\LeadsForQuery;
 use Aaix\LaravelIslandsSearch\Contracts\ProvidesSearchTips;
 use Aaix\LaravelIslandsSearch\Contracts\SearchSource;
 use Aaix\LaravelIslandsSearch\SearchHit;
@@ -48,6 +49,7 @@ class SearchController extends Controller
         $limit = (int) config('islands-search.limit_per_source');
 
         return collect($sources)
+            ->sortBy(fn (SearchSource $source): int => $source instanceof LeadsForQuery && $source->leadsFor($query) ? 0 : 1)
             ->map(fn (SearchSource $source): array => [
                 'key' => $source->key(),
                 'label' => $source->label(),

@@ -89,3 +89,11 @@ test('scout sources turn matching records into hits', function () {
         'data' => [],
     ]]);
 });
+
+test('a source that leads for the query comes first, the others keep their order', function () {
+    member(['name' => 'Ore Admin', 'email' => 'ore@example.com']);
+    $this->actingAs(member(['is_admin' => true]));
+
+    expect(collect(search('ore')->json('data.groups'))->pluck('key')->all())->toBe(['users', 'pages'])
+        ->and(collect(search('or')->json('data.groups'))->pluck('key')->all())->toBe(['pages', 'users']);
+});
