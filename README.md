@@ -1,3 +1,9 @@
+<p align="center">
+  <a href="https://github.com/jonaaix/laravel-islands-search">
+    <img src="https://raw.githubusercontent.com/jonaaix/laravel-islands-search/main/laravel-islands-search.svg" alt="Laravel Islands Search Logo" width="200">
+  </a>
+</p>
+
 <h1 align="center">Laravel Islands Search</h1>
 
 <p align="center">
