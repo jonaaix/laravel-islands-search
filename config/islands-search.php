@@ -12,7 +12,8 @@ return [
     'max_query_length' => 100,
 
     /*
-    | How many recently opened hits the modal keeps per user in the browser.
+    | How many recently opened hits the modal keeps per user — in the browser, or in the recent
+    | store when the plugin is given one.
     */
     'recent_limit' => 8,
 ];

@@ -16,6 +16,7 @@ test('the search box is mounted into the panel topbar with its props', function 
 
     expect($props['searchUrl'])->toBe(route('filament.admin.islands-search'))
         ->and($props['recentKey'])->toBe('islands-search:recent:admin:'.$user->id)
+        ->and($props['recentUrl'])->toBeNull()
         ->and($props['icons'])->toHaveKey('m-magnifying-glass');
 });
 

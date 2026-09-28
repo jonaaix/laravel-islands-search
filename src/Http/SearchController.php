@@ -6,6 +6,7 @@ namespace Aaix\LaravelIslandsSearch\Http;
 
 use Aaix\LaravelIslandsSearch\Contracts\LeadsForQuery;
 use Aaix\LaravelIslandsSearch\Contracts\ProvidesSearchTips;
+use Aaix\LaravelIslandsSearch\Contracts\RecentHitStore;
 use Aaix\LaravelIslandsSearch\Contracts\SearchSource;
 use Aaix\LaravelIslandsSearch\SearchHit;
 use Aaix\LaravelIslandsSearch\SearchTip;
@@ -29,12 +30,19 @@ class SearchController extends Controller
         $sources = $this->visibleSources($request);
 
         $groups = $query === '' ? [] : $this->groups($sources, $query);
+        $recent = $query === '' ? $this->recent($request) : [];
 
-        $iconNames = collect($groups)->flatMap(fn (array $group): array => array_column($group['hits'], 'icon'))->filter()->values()->all();
+        $iconNames = collect($groups)
+            ->flatMap(fn (array $group): array => array_column($group['hits'], 'icon'))
+            ->merge(array_column($recent, 'icon'))
+            ->filter()
+            ->values()
+            ->all();
 
         return response()->json(['data' => [
             'query' => $query,
             'groups' => $groups,
+            'recent' => $recent,
             'icons' => $icons->build($iconNames),
             'tips' => $query === '' ? $this->tips($sources) : [],
         ]]);
@@ -71,6 +79,26 @@ class SearchController extends Controller
             ->flatMap(fn (ProvidesSearchTips $source): array => array_map(fn (SearchTip $tip): array => $tip->toArray(), $source->tips()))
             ->values()
             ->all();
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function recent(Request $request): array
+    {
+        $store = $request->route()?->defaults[RecentHitController::STORE] ?? null;
+
+        if ($store === null || $request->user() === null) {
+            return [];
+        }
+
+        /** @var RecentHitStore $recentStore */
+        $recentStore = app($store);
+
+        return array_map(
+            fn (SearchHit $hit): array => $hit->toArray(),
+            $recentStore->recent($request->user(), (int) config('islands-search.recent_limit')),
+        );
     }
 
     /**

@@ -10,7 +10,7 @@ function read(key) {
     }
 }
 
-export function useRecentHits(key, limit) {
+function useBrowserRecentHits(key, limit) {
     const entries = ref(read(key));
 
     const hits = ref(entries.value.map((entry) => entry.hit));
@@ -29,5 +29,38 @@ export function useRecentHits(key, limit) {
         }
     }
 
-    return { hits, icons, remember };
+    return { hits, icons, remember, load: () => {} };
+}
+
+function useServerRecentHits(url, limit) {
+    const hits = ref([]);
+    const icons = ref({});
+
+    function load(recent) {
+        hits.value = recent ?? [];
+    }
+
+    function remember(hit) {
+        hits.value = [hit, ...hits.value.filter((entry) => entry.url !== hit.url)].slice(0, limit);
+
+        // Sent while the browser is already leaving, so it has to outlive the page.
+        fetch(url, {
+            method: 'POST',
+            keepalive: true,
+            credentials: 'same-origin',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+            },
+            body: JSON.stringify(hit),
+        }).catch(() => {});
+    }
+
+    return { hits, icons, remember, load };
+}
+
+export function useRecentHits(key, limit, url = null) {
+    return url ? useServerRecentHits(url, limit) : useBrowserRecentHits(key, limit);
 }

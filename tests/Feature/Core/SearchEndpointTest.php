@@ -25,6 +25,7 @@ test('an empty query answers with the tips of the visible sources instead of hit
     search('')->assertOk()->assertExactJson(['data' => [
         'query' => '',
         'groups' => [],
+        'recent' => [],
         'icons' => [],
         'tips' => [['example' => 'orders', 'description' => 'Finds the orders page']],
     ]]);

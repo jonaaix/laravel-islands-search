@@ -8,6 +8,7 @@ use Aaix\LaravelIslands\IslandsServiceProvider;
 use Aaix\LaravelIslandsSearch\IslandsSearch;
 use Aaix\LaravelIslandsSearch\IslandsSearchServiceProvider;
 use Aaix\LaravelIslandsSearch\Tests\Fixtures\AdminUsersSource;
+use Aaix\LaravelIslandsSearch\Tests\Fixtures\ArrayRecentStore;
 use Aaix\LaravelIslandsSearch\Tests\Fixtures\StaticSource;
 use BladeUI\Heroicons\BladeHeroiconsServiceProvider;
 use BladeUI\Icons\BladeIconsServiceProvider;
@@ -39,6 +40,8 @@ abstract class TestCase extends BaseTestCase
     {
         $router->middleware(['web', 'auth'])->group(function (): void {
             IslandsSearch::route('search', [StaticSource::class, AdminUsersSource::class])->name('search');
+            IslandsSearch::route('remembering-search', [StaticSource::class], ArrayRecentStore::class)->name('remembering-search');
+            IslandsSearch::recentRoute('remembering-search/recent', ArrayRecentStore::class)->name('remembering-search.recent');
         });
     }
 

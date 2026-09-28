@@ -14,7 +14,7 @@ const { t } = useTranslations();
 const icons = reactive({ ...props.icons });
 provideIcons(icons);
 
-const recent = useRecentHits(props.recentKey, props.recentLimit);
+const recent = useRecentHits(props.recentKey, props.recentLimit, props.recentUrl ?? null);
 
 const isOpen = ref(false);
 const query = ref('');
@@ -48,7 +48,7 @@ function focusInput() {
 function open() {
     isOpen.value = true;
     activeIndex.value = 0;
-    loadTips();
+    loadIdle();
     Object.assign(icons, recent.icons.value);
     // The modal focuses its first control on open; the input takes focus after it.
     focusInput();
@@ -76,15 +76,19 @@ async function search(term, signal) {
     return (await response.json()).data;
 }
 
-async function loadTips() {
-    if (tipsRequested) {
+// Recent hits kept on the server are asked for on every opening: a record may have moved on since.
+async function loadIdle() {
+    if (tipsRequested && !props.recentUrl) {
         return;
     }
 
     tipsRequested = true;
 
     try {
-        tips.value = (await search('')).tips;
+        const data = await search('');
+        tips.value = data.tips;
+        Object.assign(icons, data.icons);
+        recent.load(data.recent);
     } catch {
         tipsRequested = false;
     }

@@ -14,16 +14,18 @@ class SearchTrigger extends Component
     public function __construct(
         public string $url,
         public ?string $recentKey = null,
+        public ?string $recentUrl = null,
     ) {}
 
     /**
-     * @return array{searchUrl: string, recentKey: string, recentLimit: int, icons: array<string, array{box: string, stroke: bool, html: string}>}
+     * @return array{searchUrl: string, recentKey: string, recentUrl: ?string, recentLimit: int, icons: array<string, array{box: string, stroke: bool, html: string}>}
      */
     public function islandProps(): array
     {
         return [
             'searchUrl' => $this->url,
             'recentKey' => $this->recentKey ?? implode(':', array_filter(['islands-search:recent', Auth::id()], fn ($part): bool => $part !== null)),
+            'recentUrl' => $this->recentUrl,
             'recentLimit' => (int) config('islands-search.recent_limit'),
             'icons' => app(HeroiconSet::class)->build(['m-magnifying-glass', 'o-information-circle']),
         ];
