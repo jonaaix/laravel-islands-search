@@ -56,7 +56,7 @@ test('hits are grouped by source and carry their icon definitions', function () 
 
     expect($response->json('data.groups'))->toHaveCount(1)
         ->and($response->json('data.groups.0'))->toMatchArray(['key' => 'pages', 'label' => 'Pages'])
-        ->and($response->json('data.groups.0.hits.0'))->toBe(['title' => 'Orders', 'url' => '/orders', 'subtitle' => null, 'icon' => 'o-document'])
+        ->and($response->json('data.groups.0.hits.0'))->toBe(['title' => 'Orders', 'url' => '/orders', 'subtitle' => null, 'icon' => 'o-document', 'kind' => null, 'data' => []])
         ->and($response->json('data.icons.o-document.box'))->toBe('0 0 24 24');
 });
 
@@ -85,5 +85,7 @@ test('scout sources turn matching records into hits', function () {
         'url' => '/users/'.$alice->id,
         'subtitle' => 'alice@example.com',
         'icon' => 'o-user',
+        'kind' => null,
+        'data' => [],
     ]]);
 });

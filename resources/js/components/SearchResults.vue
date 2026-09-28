@@ -2,6 +2,7 @@
 import { computed } from 'vue';
 import { useTranslations } from '@aaix/laravel-islands/vue';
 import { Button, Icon, Skeleton } from '@aaix/laravel-islands/vue/helpers';
+import { searchRowFor } from '../rows.js';
 
 const props = defineProps({
     groups: { type: Array, required: true },
@@ -49,7 +50,19 @@ const indexedGroups = computed(() => {
                 <h3 class="px-2 pb-1 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ group.label }}</h3>
                 <ul>
                     <li v-for="{ hit, index } in group.hits" :key="hit.url">
+                        <component
+                            :is="searchRowFor(hit)"
+                            v-if="searchRowFor(hit)"
+                            :hit="hit"
+                            :query="query"
+                            :active="index === activeIndex"
+                            role="option"
+                            :aria-selected="index === activeIndex"
+                            @mousemove="$emit('hover', index)"
+                            @visit="$emit('visit', hit)"
+                        />
                         <a
+                            v-else
                             :href="hit.url"
                             role="option"
                             :aria-selected="index === activeIndex"
