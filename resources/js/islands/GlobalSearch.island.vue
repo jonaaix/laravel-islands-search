@@ -2,7 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import { navigateTo } from '@aaix/laravel-islands';
 import { useIsland, useTranslations } from '@aaix/laravel-islands/vue';
-import { Modal, TextField, provideIcons } from '@aaix/laravel-islands/vue/helpers';
+import { Button, Modal, Tabs, TextField, provideIcons } from '@aaix/laravel-islands/vue/helpers';
 import SearchResults from '../components/SearchResults.vue';
 import SearchTips from '../components/SearchTips.vue';
 import SearchTrigger from '../components/SearchTrigger.vue';
@@ -31,13 +31,40 @@ let debounce = null;
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
 
+const ALL = '';
+const activeGroup = ref(ALL);
+const activeLabel = ref('');
+
+const hasQuery = computed(() => query.value.trim() !== '');
+const total = computed(() => groups.value.reduce((sum, group) => sum + group.hits.length, 0));
+
+// A source that stops answering loses its group, so the chosen tab stays in place, empty, until left.
+const missingGroup = computed(() => (hasQuery.value && activeGroup.value !== ALL && !groups.value.some((group) => group.key === activeGroup.value)
+    ? { key: activeGroup.value, label: activeLabel.value }
+    : null));
+
+const tabs = computed(() => [
+    { key: ALL, label: t('All'), count: total.value },
+    ...groups.value.map((group) => ({ key: group.key, label: group.label, count: group.hits.length })),
+    ...(missingGroup.value ? [{ ...missingGroup.value, count: 0 }] : []),
+]);
+
+const showsTabs = computed(() => hasQuery.value && (groups.value.length > 1 || activeGroup.value !== ALL));
+
 const visibleGroups = computed(() => {
-    if (query.value.trim() !== '') {
-        return groups.value;
+    if (hasQuery.value) {
+        return activeGroup.value === ALL ? groups.value : groups.value.filter((group) => group.key === activeGroup.value);
     }
 
     return recent.hits.value.length > 0 ? [{ key: 'recent', label: t('Recent'), hits: recent.hits.value }] : [];
 });
+
+function selectGroup(key) {
+    activeGroup.value = key;
+    activeLabel.value = tabs.value.find((tab) => tab.key === key)?.label ?? '';
+    activeIndex.value = 0;
+    focusInput();
+}
 
 const flatHits = computed(() => visibleGroups.value.flatMap((group) => group.hits));
 
@@ -48,6 +75,7 @@ function focusInput() {
 function open() {
     isOpen.value = true;
     activeIndex.value = 0;
+    activeGroup.value = ALL;
     loadIdle();
     Object.assign(icons, recent.icons.value);
     // The modal focuses its first control on open; the input takes focus after it.
@@ -152,6 +180,16 @@ function onKeydown(event) {
         }
     }
 
+    if ((event.key === 'ArrowRight' || event.key === 'ArrowLeft') && showsTabs.value) {
+        const keys = tabs.value.filter((tab) => tab.count > 0 || tab.key === activeGroup.value).map((tab) => tab.key);
+        const at = keys.indexOf(activeGroup.value);
+
+        if (keys.length > 1 && at !== -1) {
+            event.preventDefault();
+            selectGroup(keys[(at + (event.key === 'ArrowRight' ? 1 : -1) + keys.length) % keys.length]);
+        }
+    }
+
     if (event.key === 'Enter' && flatHits.value[activeIndex.value]) {
         event.preventDefault();
         visit(flatHits.value[activeIndex.value]);
@@ -194,7 +232,15 @@ onBeforeUnmount(() => {
                     <SearchTips v-if="tips.length > 0" class="absolute inset-0 flex items-center justify-end pe-1.5" :tips="tips" @pick="applyTip" />
                 </div>
 
+                <Tabs v-if="showsTabs" :model-value="activeGroup" :items="tabs" @update:model-value="selectGroup" />
+
+                <div v-if="missingGroup" class="space-y-3 py-10 text-center">
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ t('No :group for ":query".', { group: missingGroup.label, query: query.trim() }) }}</p>
+                    <Button v-if="total > 0" tone="secondary" @click="selectGroup(ALL)">{{ t('Show all :count results', { count: total }) }}</Button>
+                </div>
+
                 <SearchResults
+                    v-else
                     :groups="visibleGroups"
                     :active-index="activeIndex"
                     :query="query.trim()"
@@ -209,6 +255,7 @@ onBeforeUnmount(() => {
             <template #footer>
                 <div class="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                     <span><kbd class="font-sans">↑↓</kbd> {{ t('to navigate') }}</span>
+                    <span v-if="showsTabs"><kbd class="font-sans">←→</kbd> {{ t('to filter') }}</span>
                     <span><kbd class="font-sans">↵</kbd> {{ t('to open') }}</span>
                     <span><kbd class="font-sans">esc</kbd> {{ t('to close') }}</span>
                 </div>
