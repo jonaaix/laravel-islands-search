@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useTranslations } from '@aaix/laravel-islands/vue';
 import { Button, Icon, Skeleton } from '@aaix/laravel-islands/vue/helpers';
 import { searchRowFor } from '../rows.js';
@@ -24,6 +24,14 @@ const indexedGroups = computed(() => {
         hits: group.hits.map((hit) => ({ hit, index: index++ })),
     }));
 });
+
+const listbox = ref(null);
+
+function revealActive() {
+    listbox.value?.querySelector('[role="option"][aria-selected="true"]')?.scrollIntoView({ block: 'nearest' });
+}
+
+defineExpose({ revealActive });
 </script>
 
 <template>
@@ -45,7 +53,7 @@ const indexedGroups = computed(() => {
             {{ t('Type to search modules and records.') }}
         </p>
 
-        <div v-else class="max-h-[60vh] space-y-3 overflow-y-auto" role="listbox">
+        <div v-else ref="listbox" class="max-h-[60vh] space-y-3 overflow-y-auto" role="listbox">
             <section v-for="group in indexedGroups" :key="group.key">
                 <h3 class="px-2 pb-1 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ group.label }}</h3>
                 <ul>
@@ -66,7 +74,7 @@ const indexedGroups = computed(() => {
                             :href="hit.url"
                             role="option"
                             :aria-selected="index === activeIndex"
-                            class="flex h-11 items-center gap-3 rounded-lg px-2 text-sm"
+                            class="flex min-h-11 items-center gap-3 rounded-lg px-2 py-1 text-sm"
                             :class="index === activeIndex ? 'bg-gray-100 text-gray-950 dark:bg-white/10 dark:text-white' : 'text-gray-700 dark:text-gray-300'"
                             @mousemove="$emit('hover', index)"
                             @click.prevent="$emit('visit', hit)"

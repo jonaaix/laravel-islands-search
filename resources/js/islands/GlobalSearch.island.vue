@@ -24,6 +24,7 @@ const isLoading = ref(false);
 const hasError = ref(false);
 const activeIndex = ref(0);
 const inputFrame = ref(null);
+const results = ref(null);
 
 let controller = null;
 let tipsRequested = false;
@@ -177,6 +178,7 @@ function onKeydown(event) {
 
         if (count > 0) {
             activeIndex.value = (activeIndex.value + (event.key === 'ArrowDown' ? 1 : -1) + count) % count;
+            nextTick(() => results.value?.revealActive());
         }
     }
 
@@ -241,6 +243,7 @@ onBeforeUnmount(() => {
 
                 <SearchResults
                     v-else
+                    ref="results"
                     :groups="visibleGroups"
                     :active-index="activeIndex"
                     :query="query.trim()"
